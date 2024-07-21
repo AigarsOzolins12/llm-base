@@ -1,0 +1,40 @@
+- name: Initial local environment setup
+  hosts: local
+  become: yes
+  vars_files:
+    - ./vars/local_setup_vars.yml
+  tasks:
+    - name: Create python ENV
+      command: "python -m venv ../{{ playbook_dir }}/venv"
+    - name: Active python ENV
+      command: "source ../{{ playbook_dir }}/venv/bin/activate"
+    - name: Create .ENV file from template
+      command:
+        chdir: ..
+        cmd: "cp .env-template .env"
+    - name: Compose up
+      command: "docker compose up --build -d"
+    - name: Download model
+      command:
+        chdir: ..
+        cmd: "curl -L -o {{ base_model_save_as }} {{base_model_download_url}}"
+        creates: "./ollama/external-models/{{ base_model_save_as }}"
+    - name: Create external model directory in Ollama volume
+      command: 
+        chdir: ..
+        cmd: "mkdir -p ./ollama/external-models"
+        creates: "./ollama/external-models"
+    - name: Move downloaded GGUF model to Ollama volume
+      command:
+        chdir: .. 
+        cmd: "mv ./{{ base_model_save_as }} ./ollama/external-models/{{ base_model_save_as }}"
+        creates: "./ollama/external-models/{{ base_model_save_as }}"
+    - name: Copy modelfile to Ollama volume
+      command:
+        chdir: ..
+        cmd: "cp ./ollama-modelfiles/MistralModelfile ./ollama/external-models/MistralModelfile"
+        creates: "./ollama/external-models/MistralModelfile"
+    - name: Load downloaded model into Ollama
+      community.docker.docker_container_exec:
+        container: ollama
+        command: /bin/bash -c "ollama create model -f /root/.ollama/external-models/MistralModelfile"

@@ -1,0 +1,10 @@
+/open-webui
+/ollama
+/venv
+.env
+django-backend/app/db.sqlite3
+*__pycache__
+/postgres_data
+django-backend/app/static
+*migrations
+django-backend/app/app/django_debug.log

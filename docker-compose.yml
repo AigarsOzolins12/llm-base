@@ -1,0 +1,71 @@
+services:
+  ollama:
+    image: ollama/ollama:0.2.5
+    ports:
+      - ${OLLAMA_SERVER_PORT}:11434
+    volumes:
+      - .:/code
+      - ./ollama:/root/.ollama
+    container_name: ollama
+    pull_policy: always
+    tty: true
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+    networks:
+      - ollama-docker
+
+  ollama-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: ollama-webui
+    volumes:
+      - ./open-webui:/app/backend/data
+    depends_on:
+      - ollama
+    ports:
+      - 8080:8080
+    environment:
+      - OLLAMA_BASE_URLS=http://host.docker.internal:7869
+      - WEBUI_URL=http://localhost:8080
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    restart: unless-stopped
+    networks:
+      - ollama-docker
+  django-db:
+    image: postgres:12.19-bookworm
+    restart: always
+    container_name: django-db
+    ports:
+      - "5482:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    networks:
+      - ollama-docker
+
+  django-backend:
+    build: ./django-backend/app/
+    env_file:
+      - ./.env
+    volumes:
+      - ./django-backend/app/:/app
+    ports:
+      - 8000:8000
+    container_name: django-backend
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      - django-db
+    command: ./setup.py
+    networks:
+      - ollama-docker
+  
+
+networks:
+  ollama-docker:
+    external: false
