@@ -64,7 +64,20 @@ services:
     command: ./setup.py
     networks:
       - ollama-docker
-  
+
+  nextjs-django-frontend:
+    build: ./nextjs-django-frontend/
+    ports:
+      - 3000:3000
+    container_name: nextjs-django-frontend
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      - django-db
+      - django-backend
+    command: npm start
+    networks:
+      - ollama-docker
 
 networks:
   ollama-docker:
