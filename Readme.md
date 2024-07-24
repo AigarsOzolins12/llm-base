@@ -1,4 +1,4 @@
-# LLM playground
+# LLM Base
 In other to make my life easier when it comes to the future development involving LLM's and other ML related tasks I decided to create a baseline tool stack. The idea being that this could be the baseline for any python or java app that would have to use an LLM or some other AI tool.
 
 That currently involves:
