@@ -38,3 +38,6 @@
       community.docker.docker_container_exec:
         container: ollama
         command: /bin/bash -c "ollama create model -f /root/.ollama/external-models/MistralModelfile"
+    - name: Install NPM packages for nextjs django frontend
+      community.general.npm:
+        path: ../nextjs-django-backend
