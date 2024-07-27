@@ -6,6 +6,7 @@ That currently involves:
 - ollama-webui [link](https://github.com/open-webui/open-webui) (A nice UI for testing LLM's on their own)
 - django-backend (A very bare bones django API for chatting with ollama model)
 - postgres (DB for django backend)
+- A sample react app for chatting with ollama LLM (NextJs)
 
 The task-by-task to do list can be read below, however the overall planned additions are:
 - Spring-Boot (java) / Angular
@@ -41,15 +42,20 @@ From project root run:
 
 
 ## Testing ollama text generation endpoint by using the django backend
+
+### Curl commandd
 Replace "content" and add more messages as needed.
 
 > curl -N -X POST http://localhost:8000/generate-ollama -H "Content-Type: application/json" -d '{"user_id":"someuserid12345","messages":[{"role":"user","content":"Why is the sky blue?"}]}'
+
+### Next JS app
+If all containers are raised an example nextjs app for using ollama is available at http://localhost:3000/chat 
 
 ## The great TO-DO list of things to do
 - [x] Add ollama and ollama-webui
 - [x] Add ansible playbook for initial local ENV setup. (ollama model download, install)
 - [x] Add an example django backend
-- [ ] Add example React app for consuming django-backend
+- [ ] Add example React app(NextJs) for consuming django-backend
 - [ ] Add nginx for request management and secure django/react (user auth)
 - [ ] Add monitoring and statistics for LLM usage
 - [ ] Host example stack, make plays act as root only when necessary, add docker install to setup play
