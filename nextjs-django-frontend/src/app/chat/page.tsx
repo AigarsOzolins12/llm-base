@@ -1,36 +1,80 @@
 'use client'
 import * as React from 'react'
 import Button from '@mui/material/Button'
-import { TextField } from '@mui/material'
+import { TextField, Typography, Box, Stack, CssBaseline, CircularProgress } from '@mui/material'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import { ChatMessage } from './ChatMessage'
+import { ChatMessageState } from './ChatMessageState'
 
 export default function Chat() {
   const [userMessage, setUserMessage] = React.useState("Why is the sky blue?")
-  const [chatResponse, setChatResponse] = React.useState("No message here yet!")
+  const [messages, setMessages] = React.useState<ChatMessage[]>([]);
+  const [lastResponseMessage, setLastResponseMessage] = React.useState("")
 
-  return (<React.Fragment>
-            <TextField id="user-input-textfield"           
-              label="Multiline"
-              multiline
-              maxRows={4}
-              fullWidth
-              onChange={(e) => handleUserMessageChange(e)}
-              value={userMessage}
-            />
-            <Button variant="contained" onClick={generateResponse}>Send message</Button>
-            <TextField id="response-textfield"
-            label="Multiline"
+  return (
+  <React.Fragment>
+    <CssBaseline/>
+      <Stack spacing={5} alignItems={'center'} justifyItems={'center'}>
+        <Stack spacing={2}>
+          {messages.map(message => (
+            <Box key={`message-${message.role}-${messages.indexOf(message)}`}>{renderMessageCard(message)}</Box>
+          ))}
+          {
+            lastResponseMessage && 
+            <Box key={`message-assistant-lastmessage`}>
+              {renderMessageCard({role: "assistant", content: lastResponseMessage, state: ChatMessageState.RESPONDING})}
+            </Box>
+          }
+        </Stack>
+        
+        <Stack spacing={2} maxWidth="sm">
+          <TextField id="user-input-textfield"           
+            label="Your message goes here!"
             multiline
-            maxRows={20}
+            maxRows={4}
             fullWidth
-            value={chatResponse}/>
+            onChange={(e) => handleUserMessageChange(e)}
+            value={userMessage}
+          />
+          <Box>
+            {lastResponseMessage && <CircularProgress />}
+            {!lastResponseMessage &&
+              <Button variant="contained" onClick={generateResponse}>
+                Sent a message
+              </Button>
+            }
+          </Box>
+        </Stack>
+      </Stack>
+    </React.Fragment>
+    );
 
-          </React.Fragment>);
+  function renderMessageCard(message: ChatMessage): JSX.Element {
+    return (<React.Fragment>
+      <Card variant='outlined'>
+        <CardContent>
+          <Typography variant="h5" component="div">
+            {message.role}
+          </Typography>
+          <Typography variant="body2">
+            {message.content}
+          </Typography>
+        </CardContent>
+      </Card>
+    </React.Fragment>)
+  }
 
-  function handleUserMessageChange(e:any) {
+
+  function handleUserMessageChange(e:any): void {
     setUserMessage(e.target.value)
   }
 
   function generateResponse() {
+    const messagesToSend = [...messages, {role: "user", content: userMessage, state: ChatMessageState.SENT}]
+    setMessages(messagesToSend)
+    setLastResponseMessage('About to respond...')
+
     fetch('http://localhost:8000/generate-ollama', {
       method: 'POST',
       headers: {
@@ -38,33 +82,33 @@ export default function Chat() {
       },
       body: JSON.stringify({
         'user_id': 'someuserid12345',
-        'messages': [
-          {
-            'role': 'user',
-            'content': userMessage
-          }
-        ]
+        'messages': messagesToSend
       })
-    }).then(response => handleStream(response))
+    }).then(response => {
+      decodeResponseStream(response, messagesToSend)
+    })
   }
   
-  async function handleStream(response: Response) {
+  async function decodeResponseStream(response: Response, sentMessages: ChatMessage[]) {
     if (response && response.body) {
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let result = ''
-      
+      setLastResponseMessage(result)
+
       while (true) {
         const { done, value } = await reader.read()
         if (done) {
           break;
         }
         result += decoder.decode(value, { stream: true })
-        setChatResponse(result)
+        setLastResponseMessage(result)
       }
-    
+
       result += decoder.decode()
-      setChatResponse(result)
+      setMessages([...sentMessages, {role: "assistant", content:result, state: ChatMessageState.SUCCESS}])
+      setLastResponseMessage('')
+      setUserMessage('')
     }
   }
   
