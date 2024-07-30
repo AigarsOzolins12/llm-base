@@ -36,6 +36,7 @@ This playbook will do:
 - Up the docker containers
 - Download Mistral 7B model from Huggingface (might require to login to hugging face beforehand) (the downloadable model can be changed in ansbile/vars/local_setup_vars.yml)
 - Load the downloaded model into ollama
+- Install the node packages for frontend sub-projects (React/Next-Js)
 
 From project root run:
 > ansible-playbook -i ./inventory ./ansible/local_setup.yml -vvvv
