@@ -4,10 +4,14 @@
   vars_files:
     - ./vars/local_setup_vars.yml
   tasks:
-    - name: Create python ENV
-      command: "python -m venv ../{{ playbook_dir }}/venv"
-    - name: Active python ENV
-      command: "source ../{{ playbook_dir }}/venv/bin/activate"
+    # - name: Create python ENV
+    #   command: 
+    #     chdir: ..
+    #     cmd: "python -m venv ./venv"
+    # - name: Active python ENV
+    #   command:
+    #     chdir: ..
+    #     cmd: "source ./venv/bin/activate"
     - name: Create .ENV file from template
       command:
         chdir: ..
@@ -32,12 +36,12 @@
     - name: Copy modelfile to Ollama volume
       command:
         chdir: ..
-        cmd: "cp ./ollama-modelfiles/MistralModelfile ./ollama/external-models/MistralModelfile"
-        creates: "./ollama/external-models/MistralModelfile"
+        cmd: "cp ./ollama-modelfiles/{{ base_model_ollama_file }} ./ollama/external-models/{{ base_model_ollama_file }}"
+        creates: "./ollama/external-models/{{ base_model_ollama_file }}"
     - name: Load downloaded model into Ollama
       community.docker.docker_container_exec:
         container: ollama
-        command: /bin/bash -c "ollama create model -f /root/.ollama/external-models/MistralModelfile"
+        command: /bin/bash -c "ollama create {{ model_name }} -f /root/.ollama/external-models/{{ base_model_ollama_file }}"
     - name: Install NPM packages for nextjs django frontend
       community.general.npm:
         path: ../nextjs-django-backend

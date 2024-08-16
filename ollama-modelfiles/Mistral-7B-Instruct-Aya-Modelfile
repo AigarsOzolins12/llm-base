@@ -1,0 +1,5 @@
+FROM ./Mistral-7B-Instruct-Aya-101-GGUF.gguf
+PARAMETER temperature 0.7
+TEMPLATE """
+[INST] {{ if .System }}{{ .System }} {{ end }}{{ .Prompt }} [/INST]
+"""

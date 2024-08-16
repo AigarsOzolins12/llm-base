@@ -15,10 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from ollama_interceptor.views import generate_ollama
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('generate-ollama', generate_ollama, name='generate_ollama')
+    path('generate-ollama', generate_ollama, name='generate_ollama'),
+    path('accounts/', include('allauth.urls'))
 ]

@@ -43,6 +43,16 @@ services:
       - "5482:5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_PASSWORD: mypassword
+    networks:
+      - ollama-docker
+
+  django-db-admin:
+    image: dpage/pgadmin4:8.10
+    container_name: django-db-admin
+    ports:
+      - "80:80"
     env_file:
       - ./.env
     networks:
@@ -79,6 +89,21 @@ services:
     networks:
       - ollama-docker
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.2
+    container_name: keycloak
+    user: root
+    env_file:
+      - ./.env
+    ports:
+      - "8090:8090"
+    command: start-dev
+    volumes:
+      - ./keycloak:/opt/keycloak/data/
+    networks:
+      - ollama-docker
+
 networks:
   ollama-docker:
     external: false
+    driver: bridge
