@@ -9,3 +9,5 @@ django-backend/app/db.sqlite3
 django-backend/app/static
 *migrations
 django-backend/app/app/django_debug.log
+/ansible/nodesource_setup.sh
+/ansible/nodejs-setup-log.txt

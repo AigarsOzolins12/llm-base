@@ -41,6 +41,11 @@ This playbook will do:
 From project root run:
 > ansible-playbook -i ./inventory ./ansible/local_setup.yml -vvvv
 
+## Starting development
+To start development, you must first activate the project virtual environment. (From project root)
+
+> source ./venv/bin/activate
+
 
 ## Testing ollama text generation endpoint by using the django backend
 

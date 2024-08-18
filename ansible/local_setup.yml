@@ -1,17 +1,62 @@
-- name: Initial local environment setup
+- name: Package download and install
   hosts: local
   become: yes
   vars_files:
     - ./vars/local_setup_vars.yml
   tasks:
-    # - name: Create python ENV
-    #   command: 
-    #     chdir: ..
-    #     cmd: "python -m venv ./venv"
-    # - name: Active python ENV
-    #   command:
-    #     chdir: ..
-    #     cmd: "source ./venv/bin/activate"
+    - name: Install python ENV package
+      ansible.builtin.apt:
+        name: "python3.12-venv"
+        state: present
+    - name: Setup docker engine apt packages
+      ansible.builtin.shell: docker-engine-apt-package-setup.sh >> package-setup-log.txt
+    - name: Install docker-ce
+      ansible.builtin.apt:
+        name: docker-ce
+        state: present
+    - name: Install docker-ce-cli
+      ansible.builtin.apt:
+        name: docker-ce-cli
+        state: present
+    - name: Install containerd.io
+      ansible.builtin.apt:
+        name: containerd.io
+        state: present
+    - name: Install docker-buildx-plugin
+      ansible.builtin.apt:
+        name: docker-buildx-plugin
+        state: present
+    - name: Install docker-compose-plugin
+      ansible.builtin.apt:
+        name: docker-compose-plugin
+        state: present
+    - name: Add docker group if not exists
+      ansible.builtin.group:
+        name: docker
+        state: present
+    - name: Add current user to the DOCKER group
+      command:
+        cmd: "usermod -aG docker $USER"
+    - name: Activate changes to the docker group
+      command:
+        cmd: "newgrp docker"
+    - name: Download and install nodejs
+      ansible.builtin.shell: ./nodejs-install.sh >> nodejs-setup-log.txt
+    - name: Downlod and install NPM
+      ansible.builtin.apt:
+        name: npm
+        state: present
+
+- name: DEV env setup
+  hosts: local
+  vars_files:
+    - ./vars/local_setup_vars.yml
+  tasks:
+    - name: Create python ENV
+      command: 
+        chdir: ..
+        cmd: "python3 -m venv ./venv"
+        creates: "./venv"
     - name: Create .ENV file from template
       command:
         chdir: ..
@@ -44,4 +89,4 @@
         command: /bin/bash -c "ollama create {{ model_name }} -f /root/.ollama/external-models/{{ base_model_ollama_file }}"
     - name: Install NPM packages for nextjs django frontend
       community.general.npm:
-        path: ../nextjs-django-backend
+        path: ../nextjs-django-frontend
