@@ -11,3 +11,4 @@ django-backend/app/static
 django-backend/app/app/django_debug.log
 /ansible/nodesource_setup.sh
 /ansible/nodejs-setup-log.txt
+-buffer

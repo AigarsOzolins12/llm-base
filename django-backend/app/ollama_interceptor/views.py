@@ -9,6 +9,8 @@ import os
 
 @api_view(['POST'])
 def generate_ollama(request: HttpRequest):
+    print("request.user.is_authenticated => ", request.user.is_authenticated)
+    
     serializer: ChatStateSerializer = ChatStateSerializer(data=request.data)
     if serializer.is_valid():
       return StreamingHttpResponse(create_model_generator(serializer.data['messages']), content_type='text/event-stream')

@@ -69,6 +69,7 @@ services:
     container_name: django-backend
     extra_hosts:
       - host.docker.internal:host-gateway
+      - localhost:172.17.0.1
     depends_on:
       - django-db
     command: ./setup.py
@@ -95,11 +96,26 @@ services:
     user: root
     env_file:
       - ./.env
+    extra_hosts:
+      - host.docker.internal:host-gateway
     ports:
       - "8090:8090"
     command: start-dev
     volumes:
       - ./keycloak:/opt/keycloak/data/
+    networks:
+      - ollama-docker
+  
+  spring-backend:
+    build: ./spring-backend
+    ports:
+      - 8084:8084
+    container_name: spring-backend
+    extra_hosts:
+      - host.docker.internal:host-gateway
+      - localhost:172.17.0.1
+    depends_on:
+      - django-db
     networks:
       - ollama-docker
 
